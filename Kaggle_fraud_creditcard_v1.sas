@@ -25,10 +25,15 @@ if selected = 1 then output training;
 else output test;
 run;
 
-* train logistic regression classifier & perform predictions under different probability cutoffs;
+* train logistic regression classifier;
 ods graphics on;
 proc logistic Data = training descending;
 model class = amount time v1--v28 / ctable pprob=(0 to 0.2 by 0.001);
 score data=test out = logit_test fitstat outroc=roc;
 run;
 
+* perform predictions under the probability cutoff from ctable;
+data predictions;
+set logit_test (keep=class amount time v1--v28 p_1);
+if p_1 >= 0.001 then prediction=1;
+else prediction=0;
